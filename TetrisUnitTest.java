@@ -94,7 +94,16 @@ public class TetrisUnitTest {
  * - tests that check that the rotation goes as planned when it is allowed.
  * - tests that check that no rotation is done when the piece can't rotate because of a lack of space. 
  */
+	@Test
 	public void checkRotationTest() {
+		Grid g = new Grid();
+		LShape l = new LShape(1, 1, g);
+		Square[] lSquares = l.getSquareArray();
+		l.rotate();
+		assertTrue(lSquares[1].getRow() == 1 && lSquares[1].getCol() == 1
+				&& lSquares[0].getRow() == 1 && lSquares[0].getCol() == 2
+				&& lSquares[2].getRow() == 1 && lSquares[2].getCol() == 0
+				&& lSquares[3].getRow() == 2 && lSquares[3].getCol() == 0);
 		
 	}
 	
