@@ -2,6 +2,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 
+// GIT PUSH TEST
+
 public abstract class AbstractPiece implements Piece {
 	protected boolean ableToMove; // can this piece move
 
