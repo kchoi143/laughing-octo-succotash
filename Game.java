@@ -111,7 +111,7 @@ public class Game {
 	// Creates a new piece
 	private Piece createPiece() {
 		Random rand = new Random();
-		int num = 5;
+		int num = rand.nextInt(7);
 		switch (num) {
 		case 0:
 			piece = new ZShape(1, Grid.WIDTH / 2 - 1, grid);
