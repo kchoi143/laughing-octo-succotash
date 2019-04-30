@@ -25,6 +25,15 @@ public class Square {
 	public static final int WIDTH = 20;
 
 	public static final int HEIGHT = 20;
+	
+	// a dictionary of booleans to  path first. (converting to matrix angles is too hard)
+	private static final boolean[][] horizontalPathFirst = {
+	    {true, true, true, true, false},
+	    {false, true, true, false, false},
+	    {false, false, false, false, false},
+	    {false, false, true, true, false},
+	    {false, true, true, true, true}
+	};
 
 	/**
 	 * Creates a square
@@ -184,25 +193,9 @@ public class Square {
 	 */
 	
 	public void rotate(Square[] square) {
-		// boundary checking around the piece's index 1 to see if it can properly rotate
-		if (square[1].getCol()+1 == (Grid.WIDTH) || square[1].getCol()-1 == -1 || square[1].getRow()+1 == (Grid.HEIGHT)
-				|| square[1].getRow()-1 == -1
-				|| grid.isSet(square[1].getRow(), square[1].getCol()+1) || grid.isSet(square[1].getRow(), square[1].getCol()-1)
-				|| grid.isSet(square[1].getRow()+1, square[1].getCol()) || grid.isSet(square[1].getRow()-1, square[1].getCol())
-				|| grid.isSet(square[1].getRow()+1, square[1].getCol()+1) || grid.isSet(square[1].getRow()-1, square[1].getCol()-1)
-				|| grid.isSet(square[1].getRow()+1, square[1].getCol()-1) || grid.isSet(square[1].getRow()-1, square[1].getCol()+1))  {
+		if (!canRotate(square)) {
 			return;
 		}
-//		else if (square[1].getColor() == Color.CYAN && (square[1].getCol()+1 == (Grid.WIDTH) || square[1].getCol()-1 == -1
-//				|| square[1].getCol()+2 == (Grid.WIDTH) || square[1].getCol()-2 == -1)) {
-//			if (square[1].getCol() > 0 && square[1].getCol() < Grid.WIDTH) {
-//				if (grid.isSet(square[1].getRow(), square[1].getCol()+3) || grid.isSet(square[1].getRow()+3, square[1].getCol())) {
-//					return;
-//				} else {
-//				}
-//				return;
-//			}
-//		}
 		for (int i = 0; i <= 3; i++) {
 			if (i != 1) {
 				// vr = vector relative to pivot square (1 in this case)
@@ -214,15 +207,6 @@ public class Square {
 				// v2 = new vector
 				int v2X = square[1].getRow() + vtX;
 				int v2Y = square[1].getCol() + vtY;
-				if (v2Y - square[i].getCol() > 0) {
-					for (int j = 0; j <= v2Y - square[i].getCol(); j++) {
-						square[i].move(Direction.RIGHT);
-					}
-				} else if (v2Y - square[i].getCol() < 0) {
-					for (int j = 0; j <= -(v2Y - square[i].getCol()); j++) {
-						square[i].move(Direction.LEFT);
-					}
-				}
 				if (v2X - square[i].getRow() > 0) {
 					for (int j = 0; j <= v2X - square[i].getRow(); j++) {
 						square[i].move(Direction.DOWN);
@@ -232,7 +216,100 @@ public class Square {
 						square[i].move(Direction.UP);
 					}
 				}
+				if (v2Y - square[i].getCol() > 0) {
+					for (int j = 0; j <= v2Y - square[i].getCol(); j++) {
+						square[i].move(Direction.RIGHT);
+					}
+				} else if (v2Y - square[i].getCol() < 0) {
+					for (int j = 0; j <= -(v2Y - square[i].getCol()); j++) {
+						square[i].move(Direction.LEFT);
+					}
+				} 
 			}
 		}
+	}
+	
+	//is the horizontal path clear?
+	public boolean horizontalTraverse(int[] pathTraveler, int[] path) {
+    //positive direction -->
+    if(path[1]>0){
+     for(int j=path[1]; j>0;j--) {
+       pathTraveler[1]+=1;
+       if(grid.isSet(pathTraveler[0],pathTraveler[1]) ) {
+         return false;
+       }
+     }
+    }
+  //Negative direction <--
+    else if(path[1]<0) {
+      for(int j=path[1]; j<0;j++) {
+        pathTraveler[1]-=1;
+        if(grid.isSet(pathTraveler[0],pathTraveler[1]) ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+	//is the vertical path clear?
+	public boolean verticalTraverse(int[] pathTraveler, int[] path) {
+	  // positive direction (down)
+	  if(path[0]>0){
+      for(int j=path[0]; j>0;j--) {
+        pathTraveler[0] += 1;
+        if(grid.isSet(pathTraveler[0], pathTraveler[1]) ) {
+          return false;
+        }
+      }
+    }
+   //Negative direction (up)
+    else if(path[0]<0) {
+      for(int j=path[0]; j<0;j++) {
+        pathTraveler[0] -=1;
+        if(grid.isSet(pathTraveler[0], pathTraveler[1]) ) {
+         return false;
+        }
+      }
+    }
+    return true;	  
+}
+	
+	public boolean canRotate(Square[] square){
+	  // {row, col}
+	  int[] pathTraveler = new int[2];
+		for (int i = 0; i <= 3; i++) {
+			if (i != 1) {
+			  pathTraveler[0] = square[i].getRow();
+			  pathTraveler[1] = square[i].getCol();
+				// vr = vector relative to pivot square (1 in this case)
+			  // origin vector - pivot origin vector = vector relative to pivot(vr) 
+				int vrX = square[i].getRow() - square[1].getRow();
+				int vrY = square[i].getCol() - square[1].getCol();
+				// vt = transformed vector
+				// cw 90 degrees vr[row,col] * [[0 1], [-1 0]] = vt(vr rotated 90 deg. cw)
+				int vtX = 0 * vrX + 1 * vrY;
+				int vtY = -1 * vrX + 0 * vrY;
+				// v2 = new vector
+				// v2 = vt as a vector relative to origin = vt + pivot origin vector
+				int v2X = square[1].getRow() + vtX;
+				int v2Y = square[1].getCol() + vtY;
+				//[delta row, delta col] or the path that square[i] will take during rotation
+				int [] path = {v2X-square[i].getRow(), v2Y-square[i].getCol()};
+				//traverse delta x or delta y direction first?
+				if( horizontalPathFirst[vrX+2][vrY+2] ) {
+			    //check the horizontal squares first
+				  if(!horizontalTraverse(pathTraveler, path) || !verticalTraverse(pathTraveler, path)) {
+				    return false;
+				  }
+				}else {
+				  //check the squares vertically first
+          if(!verticalTraverse(pathTraveler, path) || !horizontalTraverse(pathTraveler, path)) {
+            return false;
+          }
+				}
+			}
+		}
+		return true;
 	}
 }

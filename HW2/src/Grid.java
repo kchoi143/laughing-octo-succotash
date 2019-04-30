@@ -56,7 +56,7 @@ public class Grid {
 	}
 
 	/**
-	 * Returns true if the location (row, col) on the grid is occupied
+	 * Returns true if the location (row, col) on the grid is occupied or out of bounds
 	 * 
 	 * @param row
 	 *            the row in the grid
@@ -64,8 +64,16 @@ public class Grid {
 	 *            the column in the grid
 	 */
 	public boolean isSet(int row, int col) {
+	  if(!(0<=row) || !(row<HEIGHT)){
+	    return true;
+	  }
+	  if(!(0<=col) || !(col<WIDTH)){
+	    return true;
+	  }
+	    
 		return !board[row][col].getColor().equals(EMPTY);
 	}
+	
 
 	/**
 	 * Changes the color of the Square at the given location
